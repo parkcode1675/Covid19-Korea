@@ -1,0 +1,190 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="ajax.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
+    <script>
+        window.onload = function(){
+            setData();
+        }
+
+        google.charts.load('current', {
+            'packages':['geochart'],
+        });
+
+        function setData(){
+            callAjax(function(data){
+                //console.log(data);
+
+                var parseXML = new DOMParser();
+	            var xmlDoc = parseXML.parseFromString(data, "text/xml")
+
+                var xml = xmlDoc.getElementsByTagName('item');
+
+                //console.log(xml);
+
+                var array = [['Country', 'TotalDeath']];
+
+                var sortArray = [];
+
+                var thtml = '<tr>';
+
+                $('#TBD').empty();
+
+                for(var i=0;i<xml.length;i++){
+
+                    if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '합계'){
+                        $('#TC').empty();
+                        $('#TD').empty();
+                        $('#CPD').empty();
+                        $('#TIME').empty();
+
+                        $('#TC').append(parseInt(xml[i].getElementsByTagName('defCnt')[0].childNodes[0].nodeValue).toLocaleString('ko-KR'));
+                        $('#TD').append(parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue).toLocaleString('ko-KR'));
+                        $('#CPD').append(parseInt(xml[i].getElementsByTagName('incDec')[0].childNodes[0].nodeValue).toLocaleString('ko-KR'));
+                        $('#TIME').append(xml[i].getElementsByTagName('stdDay')[0].childNodes[0].nodeValue);
+                    }
+                    else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue != '검역' && xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue != '세종'){
+
+                        console.log("지역 : " + xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue);
+                        console.log("사망자 : " + xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue);
+                        console.log("확진자 : " + xml[i].getElementsByTagName('defCnt')[0].childNodes[0].nodeValue);
+                        console.log("전일 대비 증감 : " + xml[i].getElementsByTagName('incDec')[0].childNodes[0].nodeValue);
+
+                        //table
+                        sortArray.push([xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue,
+                                        xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue,
+                                        xml[i].getElementsByTagName('defCnt')[0].childNodes[0].nodeValue,
+                                        xml[i].getElementsByTagName('incDec')[0].childNodes[0].nodeValue]);
+
+                        //map
+                        if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '서울'){
+                            array.push(['Seoul',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '부산'){
+                            array.push(['Busan',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '대구'){
+                            array.push(['Daegu',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '인천'){
+                            array.push(['Incheon',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '광주'){
+                            array.push(['Gwangju',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '대전'){
+                            array.push(['Daejeon',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '울산'){
+                            array.push(['Ulsan',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '경기'){
+                            array.push(['Gyeonggi',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '강원'){
+                            array.push(['Gangwon',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '충북'){
+                            array.push(['Chungbuk',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '충남'){
+                            array.push(['Chungnam',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '전북'){
+                            array.push(['Jeonbuk',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '전남'){
+                            array.push(['Jeonnam',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '경북'){
+                            array.push(['Gyeongbuk',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '경남'){
+                            array.push(['Gyeongnam',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }else if(xml[i].getElementsByTagName('gubun')[0].childNodes[0].nodeValue == '제주'){
+                            array.push(['Jeju',parseInt(xml[i].getElementsByTagName('deathCnt')[0].childNodes[0].nodeValue)]);
+                        }
+                    }
+
+                    var data = google.visualization.arrayToDataTable(array);
+                    
+                    var options = {
+                        colorAxis       : {colors:['#E69C9C','red']},
+                        resolution      : 'provinces',
+                        displayMode     : 'regions',
+                        region          : 'KR'
+                    };
+
+                    var chart = new google.visualization.GeoChart(document.getElementById('map'));
+
+                    chart.draw(data, options);
+                }
+
+                sortArray.sort(function(a,b){
+                    return b[1] - a[1];
+                });
+
+                console.log(sortArray);
+
+                //console.log(sortArray[0][0]);
+
+                for(var i=0;i<sortArray.length;i++){
+                    thtml += '<td>' + sortArray[i][0] + '</td>';
+                    thtml += '<td>' + parseInt(sortArray[i][1]).toLocaleString('ko-KR') + '</td>';
+                    thtml += '<td>' + parseInt(sortArray[i][2]).toLocaleString('ko-KR') + '</td>';
+                    thtml += '<td>' + parseInt(sortArray[i][3]).toLocaleString('ko-KR') + '</td>';
+                    thtml += '</tr>'
+                }
+
+                thtml += '</tr>';
+                $('#TBD').append(thtml);
+
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row" style="margin-top: 30px;">
+            <h1 style="text-align: center;">Corona19 Korea</h1>
+        </div>
+        <div class="row">
+            <h6 style="text-align: center;" id="TIME"></h6>
+        </div>
+        <div class="row" style="margin-top: 30px;"> <!--total-->
+            <div class="col-4">
+                <h4 style="text-align: center;">Total Confirmed</h4>
+            </div>
+            <div class="col-4">
+                <h4 style="text-align: center;">Total Death</h4>
+            </div>
+            <div class="col-4">
+                <h4 style="text-align: center;">Compared Previous Day</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                <h5 style="text-align: center;" id="TC"></h4>
+            </div>
+            <div class="col-4">
+                <h5 style="text-align: center;" id="TD"></h4>
+            </div>
+            <div class="col-4">
+                <h5 style="text-align: center;" id="CPD"></h4>
+            </div>
+        </div>
+        <div class="row" id="map" style="margin-top: 30px;"> <!--map-->
+
+        </div>
+        <div class="row" style="margin-top: 30px;"> <!--table-->
+            <table style="text-align: center;" class="table">
+                <thead>
+                    <tr>
+                        <th>지역</th>
+                        <th>사망자</th>
+                        <th>확진자</th>
+                        <th>전일 대비 증감</th>
+                    </tr>
+                </thead>
+                <tbody id="TBD">
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
